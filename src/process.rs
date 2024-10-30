@@ -3,6 +3,7 @@
 // Serilize is a trait that can be derived to make a serde data structure serializable to JSON, XML, etc.
 // Deserialize is a trait that can be derived to make a struct deserializable to serde data structure.
 use serde::{Serialize, Deserialize};
+use serde_json::Value;
 use std::fs;
 use csv::Reader;
 use anyhow::Result;
@@ -37,15 +38,19 @@ pub fn process_csv(input: &str, output: &str) -> anyhow::Result<()> {
             let mut reader = Reader::from_path(input)?;
             // ret is a Vec<Player> that will be used to store the parsed CSV data
             let mut ret = Vec::with_capacity(128);
-            for result in reader.deserialize() {
-                let record: Player = result?;
-                println!("{:?}", record);
-                ret.push(record);
+            let headers = reader.headers()?.clone();
+            //diffrence between deserialize and records is deserialize will return a single record
+            // records will return an iterator of records
+            for result in reader.records() {
+                let record = result?;
+                let json_value = headers.iter().zip(record.iter()).
+                    collect::<Value>();
+                ret.push(json_value);
             }
             
             // ret in here is a Vec<Player> that will be used to store the parsed CSV data
-            let json = serde_json::to_string(&ret)?;
+            // let json = serde_json::to_string(&ret)?;
             // fs is used to write the json to the output file
-            fs::write(output, json)?; // it will return an ()
+            // fs::write(output, json)?; // it will return an ()
             Ok(())
 }
