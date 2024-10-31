@@ -6,7 +6,9 @@ use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use std::fs;
 use csv::Reader;
-use anyhow::Result;
+use anyhow;
+
+use crate::opts::OutputFormat;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -25,7 +27,7 @@ struct Player {
     kit: u8,
 }
 
-pub fn process_csv(input: &str, output: &str) -> anyhow::Result<()> {
+pub fn process_csv(input: &str, output: String, format: OutputFormat) -> anyhow::Result<()> {
     // Reader::from_path is a function from the csv module
             // ? is to do a try, if the result is an error, it will return the error
             /* it just like the following code
@@ -43,14 +45,20 @@ pub fn process_csv(input: &str, output: &str) -> anyhow::Result<()> {
             // records will return an iterator of records
             for result in reader.records() {
                 let record = result?;
-                let json_value = headers.iter().zip(record.iter()).
-                    collect::<Value>();
+                // headers.iter() -> it will return an iterator of headers
+                // zip(record.iter()) -> it will return an iterator of tuple that combine the headers and record iterator [(header, record), ...]
+                // collect::<Value>() -> it will convert the iterator of tuple to a JSON Value
+                let json_value = headers.iter().zip(record.iter()).collect::<Value>();
                 ret.push(json_value);
             }
             
-            // ret in here is a Vec<Player> that will be used to store the parsed CSV data
-            // let json = serde_json::to_string(&ret)?;
-            // fs is used to write the json to the output file
-            // fs::write(output, json)?; // it will return an ()
+            // content is a string that will be used to store the serialized data
+            // serde_json, serde_yaml, and toml are used to serialize the data, it will convert the data to a string
+            let content = match format {
+                OutputFormat::Json => serde_json::to_string_pretty(&ret)?,
+                OutputFormat::Yaml => serde_yaml::to_string(&ret)?,
+                OutputFormat::Toml => toml::to_string(&ret)?,
+            };
+            fs::write(output, content)?;
             Ok(())
 }
