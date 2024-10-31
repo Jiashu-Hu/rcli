@@ -22,7 +22,6 @@ pub enum SubCommand {
 pub enum OutputFormat {
     Json,
     Yaml,
-    Toml,
 }
 
 /// Options for the csv subcommand, parsed to [`SubCommand::Csv(CsvOpts)`](SubCommand::Csv)
@@ -73,7 +72,6 @@ impl From<OutputFormat> for &'static str {
         match format {
             OutputFormat::Json => "json",
             OutputFormat::Yaml => "yaml",
-            OutputFormat::Toml => "toml",
         }
     }
 }
@@ -87,7 +85,6 @@ impl FromStr for OutputFormat {
         match s {
             "json" => Ok(OutputFormat::Json),
             "yaml" => Ok(OutputFormat::Yaml),
-            "toml" => Ok(OutputFormat::Toml),
             _ => Err(anyhow::anyhow!("Invalid format")),
         }
     }
