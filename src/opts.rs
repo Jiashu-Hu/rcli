@@ -16,6 +16,8 @@ pub enum SubCommand {
     #[command(name = "csv", about = "show csv or convert csv to other formats")]
     // CsvOpts is the struct that will be used to parse the arguments
     Csv(CsvOpts),
+    #[command(name = "genpass", about = "generate a random password")]
+    GenPass(GenPassOpts),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -42,6 +44,25 @@ pub struct CsvOpts {
     #[arg(long, default_value_t = true)]
     pub header: bool,
 }
+
+#[derive(Debug, Parser)]
+pub struct GenPassOpts {
+    #[arg(short, long, default_value_t = 16)]
+    pub length: u8,
+    
+    #[arg(long, default_value_t = true)]
+    pub uppercase: bool,
+    
+    #[arg(long, default_value_t = true)]
+    pub lowercase: bool,
+    
+    #[arg(long, default_value_t = true)]
+    pub number: bool,
+    
+    #[arg(long, default_value_t = true)]
+    pub symbol: bool,
+}
+
 
 /// verify_input_file is a value parser for the [`CsvOpts::input`] argument, it will check if the file exists.  
 /// Please note that this function is only check for file name, not the content of the file, it will
