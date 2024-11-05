@@ -2,7 +2,7 @@ use std::os::unix::process;
 
 use clap::Parser;
 // rcli csv -i input.csv -o output.json --header -d ','
-use rcli::{process_csv, process_genpass, Opts, SubCommand};
+use rcli::{process_csv, process_genpass, Base64SubCommand, Opts, SubCommand, process_encode, process_decode};
 
 fn main() -> anyhow::Result<()> {
     // opts will finally receive Opts::cmd which is SubCommand::Csv(CsvOpts)
@@ -25,6 +25,16 @@ fn main() -> anyhow::Result<()> {
                 opts.number, 
                 opts.symbol
             )?;
+        }
+        SubCommand::Base64(subcmd) => {
+            match subcmd {
+                Base64SubCommand::Encode(opts) => {
+                    process_encode(&opts.input, opts.format)?;
+                }
+                Base64SubCommand::Decode(opts) => {
+                    process_decode(&opts.input, opts.format)?;
+                }
+            }
         }
     }
 

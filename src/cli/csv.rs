@@ -1,24 +1,8 @@
-use std::{path::Path, str::FromStr, fmt};
+use std::{fmt, path::Path, str::FromStr};
 
 use clap::Parser;
-#[derive(Debug, Parser)]
-// name = "rcli" is the name of the command,
-// it will get version and author from the Cargo.toml
-#[command(name = "rcli", version, author, about, long_about = None)]
-pub struct Opts {
-    #[command(subcommand)]
-    pub cmd: SubCommand,
-}
 
-/// Subcommands of the rcli command, typed to [`Opts::cmd`]
-#[derive(Debug, Parser)]
-pub enum SubCommand {
-    #[command(name = "csv", about = "show csv or convert csv to other formats")]
-    // CsvOpts is the struct that will be used to parse the arguments
-    Csv(CsvOpts),
-    #[command(name = "genpass", about = "generate a random password")]
-    GenPass(GenPassOpts),
-}
+use super::verify_input_file;
 
 #[derive(Debug, Clone, Copy)]
 pub enum OutputFormat {
@@ -45,40 +29,6 @@ pub struct CsvOpts {
     pub header: bool,
 }
 
-#[derive(Debug, Parser)]
-pub struct GenPassOpts {
-    #[arg(short, long, default_value_t = 16)]
-    pub length: u8,
-    
-    #[arg(long, default_value_t = true)]
-    pub uppercase: bool,
-    
-    #[arg(long, default_value_t = true)]
-    pub lowercase: bool,
-    
-    #[arg(long, default_value_t = true)]
-    pub number: bool,
-    
-    #[arg(long, default_value_t = true)]
-    pub symbol: bool,
-}
-
-
-/// verify_input_file is a value parser for the [`CsvOpts::input`] argument, it will check if the file exists.  
-/// Please note that this function is only check for file name, not the content of the file, it will
-/// return ok if the file exists, otherwise it will return an error.
-
-// static: if there any thing has the same lifetime with process, it can be static
-fn verify_input_file(filename: &str) -> Result<String, &'static str> {
-    // path::new is a function from the std::path module
-    // it will create a Path object from the filename
-    // exists() is a method of the Path object, it will return true if the file exists
-    if Path::new(filename).exists() {
-        Ok(filename.into())
-    } else {
-        Err("File does not exist")
-    }
-}
 /// parse_format is a value parser for the [`CsvOpts::format`] argument, it will parse the format string to [`OutputFormat`].
 fn parse_format(format: &str) -> Result<OutputFormat, anyhow::Error> {
     // parse() may turn the string to an different type, but this type has to implement FromStr

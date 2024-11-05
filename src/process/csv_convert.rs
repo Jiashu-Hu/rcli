@@ -8,7 +8,7 @@ use std::fs;
 use csv::Reader;
 use anyhow;
 
-use crate::opts::OutputFormat;
+use crate::cli::OutputFormat;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
