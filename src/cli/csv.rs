@@ -1,8 +1,6 @@
-use std::{fmt, path::Path, str::FromStr};
-
+use super::verify_file;
 use clap::Parser;
-
-use super::verify_input_file;
+use std::{fmt, path::Path, str::FromStr};
 
 #[derive(Debug, Clone, Copy)]
 pub enum OutputFormat {
@@ -13,18 +11,18 @@ pub enum OutputFormat {
 /// Options for the csv subcommand, parsed to [`SubCommand::Csv(CsvOpts)`](SubCommand::Csv)
 #[derive(Debug, Parser)]
 pub struct CsvOpts {
-    #[arg(short, long, value_parser = verify_input_file)]
+    #[arg(short, long, value_parser = verify_file)]
     pub input: String,
-    
+
     #[arg(short, long)]
     pub output: Option<String>,
 
     #[arg(short, long, value_parser = parse_format ,default_value = "json")]
     pub format: OutputFormat,
-    
+
     #[arg(short, long, default_value_t = ',')]
     pub delimiter: char,
-    
+
     #[arg(long, default_value_t = true)]
     pub header: bool,
 }
@@ -65,5 +63,4 @@ impl fmt::Display for OutputFormat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Into::<&str>::into(*self))
     }
-    
 }
