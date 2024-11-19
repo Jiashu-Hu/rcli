@@ -5,12 +5,13 @@ use base64::{
     engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD},
     Engine as _,
 };
+use serde::de;
 
 /// process_encode will encode the input file to base64 and print the result to stdout.
 /// input is a file path, if input is "-", it will read from stdin.
 /// we use Box::new to create a Box<dyn Read> because we can't use File::open("-") to read from stdin.
 /// to make return type same for both if and else, we use Box::new to make it a Box<dyn Read>
-pub fn process_encode(input: &str, format: Base64Format) -> Result<()> {
+pub fn process_encode(input: &str, format: Base64Format) -> Result<String> {
     println!("input: {}, format: {}", input, format);
     let mut reader = get_reader(input)?;
 
@@ -25,11 +26,10 @@ pub fn process_encode(input: &str, format: Base64Format) -> Result<()> {
         Base64Format::Standard => STANDARD.encode(&buf),
         Base64Format::UrlSafe => URL_SAFE_NO_PAD.encode(&buf),
     };
-    println!("{}", encoded);
-    Ok(())
+    Ok(encoded)
 }
 
-pub fn process_decode(input: &str, format: Base64Format) -> Result<()> {
+pub fn process_decode(input: &str, format: Base64Format) -> Result<Vec<u8>> {
     let mut reader = get_reader(input)?;
     let mut buf = String::new();
     reader.read_to_string(&mut buf)?;
@@ -42,10 +42,7 @@ pub fn process_decode(input: &str, format: Base64Format) -> Result<()> {
         Base64Format::UrlSafe => URL_SAFE_NO_PAD.decode(buf)?,
     };
 
-    // TODO: decoded data might not be string (but for this example, we assume it is)
-    let decoded = String::from_utf8(decoded)?;
-    println!("{}", decoded);
-    Ok(())
+    Ok(decoded)
 }
 
 #[cfg(test)]
